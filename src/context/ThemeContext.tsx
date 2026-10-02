@@ -12,8 +12,12 @@ interface ThemeContextValue {
 const STORAGE_KEY = 'arb-theme';
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
+/** OS preference, unless an embedding host sets data-theme="light|dark" on <html>. */
 function systemPrefersDark() {
-  return typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  if (typeof window === 'undefined') return false;
+  const hostTheme = document.documentElement.dataset.theme;
+  if (hostTheme === 'dark' || hostTheme === 'light') return hostTheme === 'dark';
+  return window.matchMedia('(prefers-color-scheme: dark)').matches;
 }
 
 function readStoredTheme(): Theme {
@@ -32,9 +36,14 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const media = window.matchMedia('(prefers-color-scheme: dark)');
-    const onChange = (e: MediaQueryListEvent) => setSystemDark(e.matches);
+    const onChange = () => setSystemDark(systemPrefersDark());
     media.addEventListener('change', onChange);
-    return () => media.removeEventListener('change', onChange);
+    const observer = new MutationObserver(onChange);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    return () => {
+      media.removeEventListener('change', onChange);
+      observer.disconnect();
+    };
   }, []);
 
   const resolvedTheme = theme === 'system' ? (systemDark ? 'dark' : 'light') : theme;

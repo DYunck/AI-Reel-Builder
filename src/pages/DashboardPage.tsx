@@ -18,7 +18,7 @@ const STATS: { status: ProjectStatus; label: string; icon: typeof FilePen; tint:
 ];
 
 export function DashboardPage() {
-  const { projects, loading, error, remove } = useProjects();
+  const { projects, loading, error, confirmRemove } = useProjects();
   const resume = projects.find((p) => p.status !== 'published');
 
   return (
@@ -121,7 +121,7 @@ export function DashboardPage() {
             <ProjectCard
               key={p.id}
               project={p}
-              onDelete={(proj) => window.confirm(`Delete "${proj.title || 'Untitled Reel'}"? This can't be undone.`) && void remove(proj.id)}
+              onDelete={(proj) => void confirmRemove(proj)}
             />
           ))}
         </div>

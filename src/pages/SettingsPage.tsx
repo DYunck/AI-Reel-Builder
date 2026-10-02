@@ -1,7 +1,9 @@
+import { useNavigate } from 'react-router-dom';
 import { Database, Monitor, Moon, RotateCcw, Sun } from 'lucide-react';
 import { PageHeader } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/Button';
 import { Card, CardBody, CardHeader } from '@/components/ui/Card';
+import { useConfirm } from '@/context/ConfirmContext';
 import { useTheme, type Theme } from '@/context/ThemeContext';
 import { resetDemoData } from '@/lib/projectService';
 import { isSupabaseConfigured } from '@/lib/supabase';
@@ -15,6 +17,8 @@ const THEMES: { value: Theme; label: string; icon: typeof Sun }[] = [
 
 export function SettingsPage() {
   const { theme, setTheme } = useTheme();
+  const confirm = useConfirm();
+  const navigate = useNavigate();
 
   return (
     <div className="max-w-3xl">
@@ -64,10 +68,16 @@ export function SettingsPage() {
                 <Button
                   variant="secondary"
                   icon={<RotateCcw className="h-4 w-4" />}
-                  onClick={() => {
-                    if (window.confirm('Replace all projects in this browser with the sample Reels?')) {
+                  onClick={async () => {
+                    const ok = await confirm({
+                      title: 'Reset sample data?',
+                      message: 'All Reels saved in this browser will be replaced with the 4 sample Reels.',
+                      confirmLabel: 'Reset',
+                      danger: true,
+                    });
+                    if (ok) {
                       resetDemoData();
-                      window.location.assign('/');
+                      navigate('/');
                     }
                   }}
                 >

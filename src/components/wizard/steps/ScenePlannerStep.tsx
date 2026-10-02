@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { ArrowRight, Clapperboard, Plus, RefreshCw, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { useConfirm } from '@/context/ConfirmContext';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Input, Textarea } from '@/components/ui/Field';
 import { StepFooter, StepIntro } from '@/components/wizard/StepFooter';
@@ -10,6 +11,7 @@ import { cn, uid } from '@/lib/utils';
 import type { Scene } from '@/types/project';
 
 export function ScenePlannerStep({ project, update, goTo }: StepProps) {
+  const confirm = useConfirm();
   const [generating, setGenerating] = useState(false);
   const autoStarted = useRef(false);
   const scenes = project.scenes;
@@ -40,8 +42,13 @@ export function ScenePlannerStep({ project, update, goTo }: StepProps) {
 
   const removeScene = (id: string) => update({ scenes: scenes.filter((s) => s.id !== id) });
 
-  const handleRegenerate = () => {
-    if (scenes.length && !window.confirm('Replace your scene plan with a new one?')) return;
+  const handleRegenerate = async () => {
+    if (
+      scenes.length &&
+      !(await confirm({ title: 'Replace your scene plan?', message: 'Your current scenes and any edits will be replaced.', confirmLabel: 'Replace scenes' }))
+    ) {
+      return;
+    }
     void regenerate();
   };
 

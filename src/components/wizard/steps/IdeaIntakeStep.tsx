@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { useConfirm } from '@/context/ConfirmContext';
 import { Field, Input, Select, Textarea } from '@/components/ui/Field';
 import { StepFooter, StepIntro } from '@/components/wizard/StepFooter';
 import type { StepProps } from '@/components/wizard/types';
@@ -9,6 +10,7 @@ import { LENGTHS, TONES } from '@/data/options';
 import { cn } from '@/lib/utils';
 
 export function IdeaIntakeStep({ project, update, goTo }: StepProps) {
+  const confirm = useConfirm();
   const [generating, setGenerating] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [genError, setGenError] = useState<string | null>(null);
@@ -23,7 +25,14 @@ export function IdeaIntakeStep({ project, update, goTo }: StepProps) {
 
   const handleGenerate = async () => {
     if (!validate()) return;
-    if (project.script && !window.confirm('This will replace your current script, caption and hashtags. Continue?')) {
+    if (
+      project.script &&
+      !(await confirm({
+        title: 'Regenerate content?',
+        message: 'This replaces your current script, caption and hashtags, including any edits you made.',
+        confirmLabel: 'Regenerate',
+      }))
+    ) {
       return;
     }
     setGenerating(true);

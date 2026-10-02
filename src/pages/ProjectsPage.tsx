@@ -13,7 +13,7 @@ import type { ProjectStatus } from '@/types/project';
 type Filter = 'all' | ProjectStatus;
 
 export function ProjectsPage() {
-  const { projects, loading, remove } = useProjects();
+  const { projects, loading, confirmRemove } = useProjects();
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState<Filter>('all');
 
@@ -91,7 +91,7 @@ export function ProjectsPage() {
             <ProjectCard
               key={p.id}
               project={p}
-              onDelete={(proj) => window.confirm(`Delete "${proj.title || 'Untitled Reel'}"? This can't be undone.`) && void remove(proj.id)}
+              onDelete={(proj) => void confirmRemove(proj)}
             />
           ))}
         </div>

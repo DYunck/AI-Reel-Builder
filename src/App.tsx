@@ -1,5 +1,6 @@
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, MemoryRouter, Route, Routes } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
+import { ConfirmProvider } from '@/context/ConfirmContext';
 import { ThemeProvider } from '@/context/ThemeContext';
 import { DashboardPage } from '@/pages/DashboardPage';
 import { NewProjectPage } from '@/pages/NewProjectPage';
@@ -17,10 +18,15 @@ import { WizardPage } from '@/pages/WizardPage';
  *   /projects/:id/:step      Wizard step: idea | script | voice | scenes | build | review | publish
  *   /settings                Theme + data storage
  */
+// Embedded hosts that control the page URL (e.g. a sandboxed preview) can build
+// with VITE_ROUTER=memory to keep navigation inside the app.
+const Router = import.meta.env.VITE_ROUTER === 'memory' ? MemoryRouter : BrowserRouter;
+
 export default function App() {
   return (
     <ThemeProvider>
-      <BrowserRouter>
+      <Router>
+        <ConfirmProvider>
         <Routes>
           <Route element={<AppLayout />}>
             <Route index element={<DashboardPage />} />
@@ -32,7 +38,8 @@ export default function App() {
             <Route path="*" element={<NotFoundPage />} />
           </Route>
         </Routes>
-      </BrowserRouter>
+        </ConfirmProvider>
+      </Router>
     </ThemeProvider>
   );
 }
