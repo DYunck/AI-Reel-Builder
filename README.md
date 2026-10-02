@@ -84,6 +84,7 @@ Open **http://localhost:5173**. That's it. The app starts in **demo mode** with 
 |---|---|
 | `npm run dev` | Start the development server |
 | `npm run build` | Type-check and build for production into `dist/` |
+| `npm run build:pages` | Build for GitHub Pages (relative paths, `#/` URLs) |
 | `npm run preview` | Serve the production build locally |
 | `npm run typecheck` | Run the TypeScript compiler only |
 
@@ -146,7 +147,9 @@ AI-Reel-Builder/
 │       ├── SettingsPage.tsx
 │       └── NotFoundPage.tsx
 ├── tailwind.config.js            # darkMode: 'class', brand colors
-├── vite.config.ts                # @ → src alias
+├── .github/workflows/
+│   └── deploy-pages.yml          # Build + publish to GitHub Pages
+├── vite.config.ts                # @ → src alias, Pages build mode
 └── vercel.json                   # SPA routing for Vercel
 ```
 
@@ -219,6 +222,18 @@ Replace their bodies with calls to your own backend that return the same shapes.
 ---
 
 ## 📦 Deployment
+
+### GitHub Pages (free, built in)
+
+Live at **https://dyunck.github.io/AI-Reel-Builder/** once Pages is turned on.
+
+1. **One-time setup:** in the GitHub repo, go to **Settings → Pages**. Under *Build and deployment*, set **Source** to **Deploy from a branch**, pick **`gh-pages`** and **`/ (root)`**, then click **Save**.
+2. Every push to `main` rebuilds the site via [`.github/workflows/deploy-pages.yml`](.github/workflows/deploy-pages.yml). You can also run it manually from the **Actions** tab.
+3. *(Optional)* To use Supabase on the live site, add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` under **Settings → Secrets and variables → Actions → Variables**. Read the security note above first.
+
+The Pages build (`npm run build:pages`) uses `#/` in page addresses (for example `…/AI-Reel-Builder/#/projects`), so refreshing any page works on a static host.
+
+### Other hosts
 
 Run `npm run build` and deploy the `dist/` folder to any static host:
 

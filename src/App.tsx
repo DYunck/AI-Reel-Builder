@@ -1,4 +1,4 @@
-import { BrowserRouter, MemoryRouter, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, HashRouter, MemoryRouter, Route, Routes } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { ConfirmProvider } from '@/context/ConfirmContext';
 import { ThemeProvider } from '@/context/ThemeContext';
@@ -18,9 +18,12 @@ import { WizardPage } from '@/pages/WizardPage';
  *   /projects/:id/:step      Wizard step: idea | script | voice | scenes | build | review | publish
  *   /settings                Theme + data storage
  */
-// Embedded hosts that control the page URL (e.g. a sandboxed preview) can build
-// with VITE_ROUTER=memory to keep navigation inside the app.
-const Router = import.meta.env.VITE_ROUTER === 'memory' ? MemoryRouter : BrowserRouter;
+// VITE_ROUTER picks how pages map to URLs:
+//   browser (default)  clean URLs; the host must serve index.html for every path
+//   hash               /#/projects style URLs for static hosts like GitHub Pages
+//   memory             no URL changes, for embedded hosts that own the URL
+const Router =
+  import.meta.env.VITE_ROUTER === 'hash' ? HashRouter : import.meta.env.VITE_ROUTER === 'memory' ? MemoryRouter : BrowserRouter;
 
 export default function App() {
   return (
