@@ -15,9 +15,10 @@ AI Reel Builder helps a small business owner with no video experience turn an id
 | Code | https://github.com/DYunck/AI-Reel-Builder (`main`) |
 | Live site | https://dyunck.github.io/AI-Reel-Builder/ (GitHub Pages, demo mode) |
 | Pages build output | `gh-pages` branch. Generated, don't edit by hand |
-| Working branch | `claude/ai-reel-builder-app`. Same as `main` except this handoff file, which is only on this branch until merged |
+| Working branch | `claude/ai-reel-builder-app`. Same as `main` plus `HANDOFF.md` and `CLAUDE.md`, which are only on this branch until merged |
 | Private claude.ai demo | https://claude.ai/artifact/TEKmnvL2esK7eW5zy35SeT. A **frozen snapshot** from 2026-10-02; it does not update when `main` changes |
 | Setup and deploy docs | [`README.md`](README.md) |
+| Working rules for Claude | [`CLAUDE.md`](CLAUDE.md): test before claiming something works, ask before spending money or signing up for services, update this file every session |
 
 **Deploys:** every push to `main` runs [`.github/workflows/deploy-pages.yml`](.github/workflows/deploy-pages.yml), which type-checks, builds, and publishes to `gh-pages`. The last verified run (2026-10-02) succeeded.
 
