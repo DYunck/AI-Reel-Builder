@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="AI Reel Builder - turn an idea into an Instagram Reel with a guided, step-by-step workflow." />
+    <title>AI Reel Builder</title>
+    <script>
+      // Apply the saved theme before first paint to avoid a light/dark flash.
+      try {
+        var t = localStorage.getItem('arb-theme');
+        if (t === 'dark' || (!t && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+          document.documentElement.classList.add('dark');
+        }
+      } catch (e) {}
+    </script>
+    <script type="module" crossorigin src="./assets/index-DzGCeNfy.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-CXHB9FT8.css">
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
