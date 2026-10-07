@@ -15,8 +15,9 @@ AI Reel Builder helps a small business owner with no video experience turn an id
 | Code | https://github.com/DYunck/AI-Reel-Builder (`main`) |
 | Live site | https://dyunck.github.io/AI-Reel-Builder/ (GitHub Pages, demo mode) |
 | Pages build output | `gh-pages` branch. Generated, don't edit by hand |
-| Working branch | `claude/ai-reel-builder-app`. Same as `main` plus `HANDOFF.md` and `CLAUDE.md`, which are only on this branch until merged |
+| Working branch | `claude/ai-reel-builder-app`. Same as `main` plus `HANDOFF.md`, `CLAUDE.md` and `SPEC.md`, which are only on this branch until merged |
 | Private claude.ai demo | https://claude.ai/artifact/TEKmnvL2esK7eW5zy35SeT. A **frozen snapshot** from 2026-10-02; it does not update when `main` changes |
+| Product spec (who it's for, prioritized roadmap) | [`SPEC.md`](SPEC.md) |
 | Setup and deploy docs | [`README.md`](README.md) |
 | Working rules for Claude | [`CLAUDE.md`](CLAUDE.md): test before claiming something works, ask before spending money or signing up for services, update this file every session |
 
@@ -129,7 +130,7 @@ Ordered by impact.
 
 ## What should come next
 
-In order:
+The product roadmap (P0–P2, with the reasoning) is in [SPEC.md](SPEC.md). This is the engineering order for the near term:
 
 1. **Fix the four bugs (items 5–8).** Each is small and contained.
 2. **Commit an end-to-end test.** Port the wizard walk-through to `@playwright/test` in the repo and run it in the deploy workflow, so `main` can't ship a broken wizard. Add ESLint at the same time.
