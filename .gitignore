@@ -7,3 +7,8 @@ dist
 !.env.pages
 .DS_Store
 *.log
+
+# Playwright
+test-results
+playwright-report
+tests/e2e/.fixtures

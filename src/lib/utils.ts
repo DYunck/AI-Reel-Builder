@@ -31,6 +31,13 @@ export function formatSeconds(total: number): string {
   return `${m}:${s.toString().padStart(2, '0')}`;
 }
 
+export function formatBytes(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 ** 2) return `${Math.round(bytes / 1024)} KB`;
+  if (bytes < 1024 ** 3) return `${(bytes / 1024 ** 2).toFixed(1)} MB`;
+  return `${(bytes / 1024 ** 3).toFixed(2)} GB`;
+}
+
 export function fullScript(script: { hook: string; body: string; cta: string } | null): string {
   if (!script) return '';
   return [script.hook, script.body, script.cta].filter(Boolean).join('\n\n');

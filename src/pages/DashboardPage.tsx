@@ -6,7 +6,7 @@ import { Card } from '@/components/ui/Card';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { ProgressBar } from '@/components/ui/ProgressBar';
 import { StatusBadge } from '@/components/ui/StatusBadge';
-import { WIZARD_STEPS } from '@/data/options';
+import { getWizardPath, stepAt } from '@/data/wizardPaths';
 import { useProjects } from '@/hooks/useProjects';
 import type { ProjectStatus } from '@/types/project';
 
@@ -71,7 +71,7 @@ export function DashboardPage() {
               <div className="mt-3 flex items-center gap-3">
                 <StatusBadge status={resume.status} className="bg-white/90 ring-white/0 dark:bg-white/90" />
                 <span className="text-sm text-white/80">
-                  Next: {WIZARD_STEPS[resume.current_step - 1]?.description}
+                  Next: {stepAt(getWizardPath(resume), resume.current_step).description}
                 </span>
               </div>
               <ProgressBar value={projectProgress(resume)} className="mt-4 max-w-sm bg-white/20 dark:bg-white/20" />

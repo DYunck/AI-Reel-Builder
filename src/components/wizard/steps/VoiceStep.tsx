@@ -84,7 +84,7 @@ export function VoiceStep({ project, update, goTo }: StepProps) {
         <Card className="lg:col-span-3">
           <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3 dark:border-slate-800">
             <span className="text-sm font-semibold text-slate-900 dark:text-white">Script</span>
-            <Button variant="ghost" size="sm" onClick={() => goTo(2)} icon={<Pencil className="h-3.5 w-3.5" />}>
+            <Button variant="ghost" size="sm" onClick={() => goTo('script')} icon={<Pencil className="h-3.5 w-3.5" />}>
               Edit
             </Button>
           </div>
@@ -187,13 +187,13 @@ export function VoiceStep({ project, update, goTo }: StepProps) {
         </p>
       </Card>
 
-      <StepFooter onBack={() => goTo(2)}>
+      <StepFooter onBack={() => goTo('script')}>
         {!voice && (
-          <Button variant="ghost" onClick={() => goTo(4)}>
+          <Button variant="ghost" onClick={() => goTo('scenes')}>
             Skip, I'll record my own
           </Button>
         )}
-        <Button size="lg" onClick={() => goTo(4)} disabled={!voice} iconRight={<ArrowRight className="h-4 w-4" />}>
+        <Button size="lg" onClick={() => goTo('scenes')} disabled={!voice} iconRight={<ArrowRight className="h-4 w-4" />}>
           Continue to Scenes
         </Button>
       </StepFooter>

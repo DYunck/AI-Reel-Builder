@@ -34,6 +34,8 @@ export function newProjectDefaults(): Omit<Project, 'id' | 'created_at' | 'updat
     scenes: [],
     checklist: { script: false, voice: false, visuals: false, captions: false, music: false },
     publish_checklist: [false, false, false, false, false],
+    source: 'plan',
+    video: null,
   };
 }
 

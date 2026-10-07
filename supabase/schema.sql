@@ -34,8 +34,28 @@ create table if not exists public.projects (
   checklist         jsonb not null default
                       '{"script":false,"voice":false,"visuals":false,"captions":false,"music":false}'::jsonb,
   publish_checklist jsonb not null default '[false,false,false,false,false]'::jsonb,
-  updated_at        timestamptz not null default now()
+  updated_at        timestamptz not null default now(),
+
+  -- How the Reel is made: 'plan' (7-step wizard) or 'existing' (owner's own video)
+  source            text not null default 'plan'
+                      check (source in ('plan', 'existing')),
+  video             jsonb                                 -- own-video details, see below
 );
+
+-- Columns added after the first release. `create table if not exists` skips an
+-- existing table, so these keep this file safe to re-run on an older database.
+-- Existing rows get source = 'plan'.
+alter table public.projects add column if not exists source text not null default 'plan'
+  check (source in ('plan', 'existing'));
+alter table public.projects add column if not exists video jsonb;
+
+-- video (only for source = 'existing'). The video file itself is never stored.
+-- {
+--   "file_name": "haircut.mov", "mime_type": "video/quicktime", "size_bytes": 48211234,
+--   "duration_seconds": 21.4, "width": 1080, "height": 1920, "playable": true,
+--   "cover_image": "data:image/jpeg;base64,...",   -- ~360px wide preview, no text
+--   "cover_text": "Wait for it", "cover_time_seconds": 7.2
+-- }
 
 create index if not exists projects_updated_at_idx on public.projects (updated_at desc);
 create index if not exists projects_status_idx on public.projects (status);

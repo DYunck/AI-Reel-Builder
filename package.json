@@ -8,7 +8,8 @@
     "build": "tsc -b && vite build",
     "build:pages": "tsc -b && vite build --mode pages",
     "preview": "vite preview",
-    "typecheck": "tsc -b"
+    "typecheck": "tsc -b",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.2",
@@ -19,6 +20,7 @@
     "react-router-dom": "^6.30.6"
   },
   "devDependencies": {
+    "@playwright/test": "^1.56.1",
     "@tailwindcss/forms": "^0.5.11",
     "@types/node": "^26.6.4",
     "@types/react": "^18.3.31",

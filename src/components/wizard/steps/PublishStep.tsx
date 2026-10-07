@@ -5,10 +5,11 @@ import { CheckRow } from '@/components/ui/Checkbox';
 import { CopyButton } from '@/components/ui/CopyButton';
 import { StepFooter, StepIntro } from '@/components/wizard/StepFooter';
 import type { StepProps } from '@/components/wizard/types';
-import { PUBLISH_STEPS } from '@/data/options';
+import type { PublishStepKey } from '@/data/wizardPaths';
+import { formatSeconds } from '@/lib/utils';
 
-export function PublishStep({ project, update, goTo }: StepProps) {
-  const checks = PUBLISH_STEPS.map((_, i) => Boolean(project.publish_checklist[i]));
+export function PublishStep({ project, update, path, goBack }: StepProps) {
+  const checks = path.publishSteps.map((_, i) => Boolean(project.publish_checklist[i]));
   const allDone = checks.every(Boolean);
   const published = project.status === 'published';
 
@@ -18,9 +19,20 @@ export function PublishStep({ project, update, goTo }: StepProps) {
     update({ publish_checklist: next });
   };
 
-  const extras: Record<number, React.ReactNode> = {
-    2: <CopyButton text={project.caption} label="Copy caption" />,
-    3: <CopyButton text={project.hashtags.join(' ')} label="Copy hashtags" />,
+  const coverTime = project.video?.cover_time_seconds;
+  const extras: Partial<Record<PublishStepKey, React.ReactNode>> = {
+    caption: <CopyButton text={project.caption} label="Copy caption" />,
+    hashtags: <CopyButton text={project.hashtags.join(' ')} label="Copy hashtags" />,
+    ...(coverTime != null
+      ? {
+          publish: (
+            <p className="text-sm text-slate-600 dark:text-slate-300">
+              Your cover: slide to <strong className="tabular-nums">{formatSeconds(coverTime)}</strong>, or use the full-size
+              cover you saved.
+            </p>
+          ),
+        }
+      : {}),
   };
 
   if (published) {
@@ -53,7 +65,7 @@ export function PublishStep({ project, update, goTo }: StepProps) {
       <StepIntro title="Publish to Instagram" description="Follow these steps on your phone. Tick each one when it's done." />
 
       <ol className="space-y-3">
-        {PUBLISH_STEPS.map((step, i) => (
+        {path.publishSteps.map((step, i) => (
           <li key={step.title}>
             <CheckRow
               index={i + 1}
@@ -62,13 +74,13 @@ export function PublishStep({ project, update, goTo }: StepProps) {
               checked={checks[i]}
               onChange={(v) => toggle(i, v)}
             >
-              {extras[i]}
+              {extras[step.key]}
             </CheckRow>
           </li>
         ))}
       </ol>
 
-      <StepFooter onBack={() => goTo(6)}>
+      <StepFooter onBack={goBack}>
         {!allDone && <span className="text-center text-xs text-slate-500 sm:text-right">Complete all steps to mark as published.</span>}
         <Button
           size="lg"

@@ -136,6 +136,30 @@ function topicKeywords(text: string): string[] {
     .filter((w) => w.length > 2 && !STOP_WORDS.has(w.toLowerCase()) && !/^\d+$/.test(w));
 }
 
+const TONE_TAGS: Record<string, string[]> = {
+  Friendly: ['#communitylove'],
+  Professional: ['#expertadvice'],
+  Energetic: ['#mustsee'],
+  Funny: ['#funnyreels'],
+  Inspirational: ['#motivation'],
+  Educational: ['#tipsandtricks'],
+};
+
+/** Up to 12 tags: a combined topic tag, topic and audience words, a tone tag, then general Reel tags. */
+function buildHashtags(subject: string, audience: string, tone: string): string[] {
+  const subjectWords = topicKeywords(subject);
+  const comboTag = subjectWords.length >= 2 ? [slugTag(subjectWords.slice(-3).join(''))] : [];
+  const keywordTags = [...comboTag, ...[...subjectWords, ...topicKeywords(audience)].slice(0, 4).map(slugTag)];
+  return Array.from(
+    new Set([...keywordTags, ...(TONE_TAGS[tone] ?? TONE_TAGS.Friendly), '#reels', '#smallbusiness', '#shoplocal', '#instagramreels']),
+  ).slice(0, 12);
+}
+
+function normalizeCta(input: string): string {
+  const cta = input.trim();
+  return cta ? (/[.!?]$/.test(cta) ? cta : `${cta}.`) : 'Follow for more tips like this.';
+}
+
 export async function generateContent(input: IdeaInput): Promise<GeneratedContent> {
   await sleep(1400); // Simulate an AI request.
 
@@ -148,8 +172,7 @@ export async function generateContent(input: IdeaInput): Promise<GeneratedConten
   const bodySentences = Math.max(2, Math.min(5, Math.round(input.length / 15) + 1));
   const body = BODY_POINTS[tone].slice(0, bodySentences).join(' ');
 
-  const ctaInput = input.call_to_action.trim();
-  const cta = ctaInput ? (/[.!?]$/.test(ctaInput) ? ctaInput : `${ctaInput}.`) : 'Follow for more tips like this.';
+  const cta = normalizeCta(input.call_to_action);
   const hook = pick(HOOKS[tone])(topic, audience);
 
   const caption = [
@@ -161,20 +184,7 @@ export async function generateContent(input: IdeaInput): Promise<GeneratedConten
     .filter(Boolean)
     .join('\n\n');
 
-  const topicWords = topicKeywords(rawTopic);
-  const comboTag = topicWords.length >= 2 ? [slugTag(topicWords.slice(-3).join(''))] : [];
-  const keywordTags = [...comboTag, ...[...topicWords, ...topicKeywords(audience)].slice(0, 4).map(slugTag)];
-  const toneTags: Record<string, string[]> = {
-    Friendly: ['#communitylove'],
-    Professional: ['#expertadvice'],
-    Energetic: ['#mustsee'],
-    Funny: ['#funnyreels'],
-    Inspirational: ['#motivation'],
-    Educational: ['#tipsandtricks'],
-  };
-  const hashtags = Array.from(
-    new Set([...keywordTags, ...toneTags[tone], '#reels', '#smallbusiness', '#shoplocal', '#instagramreels']),
-  ).slice(0, 12);
+  const hashtags = buildHashtags(rawTopic, audience, tone);
 
   return { script: { hook, body, cta }, caption, hashtags };
 }
@@ -206,4 +216,62 @@ export async function generateVoice(text: string, voiceId: string) {
     generated_at: new Date().toISOString(),
     duration_seconds: Math.max(3, Math.round(words / 2.5)),
   };
+}
+
+// ---------------------------------------------------------------------------
+// Own-video path
+// ---------------------------------------------------------------------------
+
+export interface VideoCaptionInput {
+  /** One sentence from the owner, e.g. "customer reacting to her new haircut". */
+  description: string;
+  audience: string;
+  tone: string;
+  call_to_action: string;
+  duration_seconds: number;
+}
+
+export interface GeneratedCaption {
+  caption: string;
+  hashtags: string[];
+}
+
+const VIDEO_OPENERS: Record<string, ((d: string) => string)[]> = {
+  Friendly: [(d) => `We just had to share this: ${d} 💛`, (d) => `A little moment from our day: ${d} 😊`],
+  Professional: [(d) => `A closer look at our work: ${d}.`, (d) => `Behind the scenes: ${d}.`],
+  Energetic: [(d) => `You need to see this: ${d}! 🔥`, (d) => `Sound on! ${capitalize(d)}! 🎉`],
+  Funny: [(d) => `Nobody was ready for this: ${d} 😂`, (d) => `POV: ${d} 😅`],
+  Inspirational: [
+    (d) => `Moments like this are why we do what we do: ${d}. ✨`,
+    (d) => `Every day starts with small moments like this: ${d}. ✨`,
+  ],
+  Educational: [(d) => `Watch closely: ${d}. Here's what's happening 👇`, (d) => `Quick look: ${d}. Save this for later 📌`],
+};
+
+/** Mock caption writer for a video the owner already has. Same shape a real AI call should return. */
+export async function generateVideoCaption(input: VideoCaptionInput): Promise<GeneratedCaption> {
+  await sleep(1200); // Simulate an AI request.
+
+  const tone = VIDEO_OPENERS[input.tone] ? input.tone : 'Friendly';
+  const rawDescription = input.description.trim().replace(/[.!?]+$/, '') || 'a moment from our business';
+  const audience = input.audience.trim();
+
+  const lengthLine =
+    input.duration_seconds > 0 && input.duration_seconds <= 15
+      ? 'Watch till the end 👀'
+      : input.duration_seconds > 60
+        ? 'Save this so you can come back to it 📌'
+        : '';
+
+  const caption = [
+    pick(VIDEO_OPENERS[tone])(midSentence(rawDescription)),
+    lengthLine,
+    audience ? `Made for ${audience.charAt(0).toLowerCase()}${audience.slice(1)}.` : '',
+    normalizeCta(input.call_to_action),
+    'Tell us what you think in the comments 💬',
+  ]
+    .filter(Boolean)
+    .join('\n\n');
+
+  return { caption, hashtags: buildHashtags(rawDescription, audience, tone) };
 }

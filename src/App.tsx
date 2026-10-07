@@ -1,4 +1,6 @@
+import { lazy, Suspense } from 'react';
 import { BrowserRouter, HashRouter, MemoryRouter, Route, Routes } from 'react-router-dom';
+import { LoaderCircle } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { ConfirmProvider } from '@/context/ConfirmContext';
 import { ThemeProvider } from '@/context/ThemeContext';
@@ -7,7 +9,6 @@ import { NewProjectPage } from '@/pages/NewProjectPage';
 import { NotFoundPage } from '@/pages/NotFoundPage';
 import { ProjectsPage } from '@/pages/ProjectsPage';
 import { SettingsPage } from '@/pages/SettingsPage';
-import { WizardPage } from '@/pages/WizardPage';
 
 /**
  * Routes
@@ -22,6 +23,23 @@ import { WizardPage } from '@/pages/WizardPage';
 //   browser (default)  clean URLs; the host must serve index.html for every path
 //   hash               /#/projects style URLs for static hosts like GitHub Pages
 //   memory             no URL changes, for embedded hosts that own the URL
+// The wizard is the largest part of the app, so it loads only when a Reel is opened.
+const WizardPage = lazy(() => import('@/pages/WizardPage').then((m) => ({ default: m.WizardPage })));
+
+function WizardLoading() {
+  return (
+    <div className="flex min-h-[50vh] items-center justify-center">
+      <LoaderCircle className="h-8 w-8 animate-spin text-brand-500" aria-label="Loading" />
+    </div>
+  );
+}
+
+const wizard = (
+  <Suspense fallback={<WizardLoading />}>
+    <WizardPage />
+  </Suspense>
+);
+
 const Router =
   import.meta.env.VITE_ROUTER === 'hash' ? HashRouter : import.meta.env.VITE_ROUTER === 'memory' ? MemoryRouter : BrowserRouter;
 
@@ -35,8 +53,8 @@ export default function App() {
             <Route index element={<DashboardPage />} />
             <Route path="projects" element={<ProjectsPage />} />
             <Route path="projects/new" element={<NewProjectPage />} />
-            <Route path="projects/:id" element={<WizardPage />} />
-            <Route path="projects/:id/:step" element={<WizardPage />} />
+            <Route path="projects/:id" element={wizard} />
+            <Route path="projects/:id/:step" element={wizard} />
             <Route path="settings" element={<SettingsPage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Route>

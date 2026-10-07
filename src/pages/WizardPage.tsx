@@ -1,4 +1,4 @@
-import { useCallback, type ComponentType } from 'react';
+import { useCallback, useEffect } from 'react';
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, FileQuestion, LoaderCircle } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
@@ -6,48 +6,46 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { SaveIndicator } from '@/components/wizard/SaveIndicator';
 import { WizardProgress } from '@/components/wizard/WizardProgress';
-import type { StepProps } from '@/components/wizard/types';
-import { IdeaIntakeStep } from '@/components/wizard/steps/IdeaIntakeStep';
-import { ScriptStep } from '@/components/wizard/steps/ScriptStep';
-import { VoiceStep } from '@/components/wizard/steps/VoiceStep';
-import { ScenePlannerStep } from '@/components/wizard/steps/ScenePlannerStep';
-import { VideoChecklistStep } from '@/components/wizard/steps/VideoChecklistStep';
-import { FinalReviewStep } from '@/components/wizard/steps/FinalReviewStep';
-import { PublishStep } from '@/components/wizard/steps/PublishStep';
-import { WIZARD_STEPS, type WizardStepSlug } from '@/data/options';
+import { STEP_COMPONENTS } from '@/components/wizard/stepComponents';
+import { getWizardPath, stepAt, stepNumber, type StepSlug } from '@/data/wizardPaths';
 import { useAutosaveProject } from '@/hooks/useAutosaveProject';
-
-const STEP_COMPONENTS: Record<WizardStepSlug, ComponentType<StepProps>> = {
-  idea: IdeaIntakeStep,
-  script: ScriptStep,
-  voice: VoiceStep,
-  scenes: ScenePlannerStep,
-  build: VideoChecklistStep,
-  review: FinalReviewStep,
-  publish: PublishStep,
-};
+import { clearSessionVideo } from '@/lib/videoSession';
 
 export function WizardPage() {
   const { id, step } = useParams<{ id: string; step?: string }>();
   const navigate = useNavigate();
   const { project, loading, notFound, update, saveState } = useAutosaveProject(id);
 
-  const goTo = useCallback(
+  const path = project ? getWizardPath(project) : null;
+
+  // Release the owner's video file when they leave this Reel.
+  useEffect(() => () => {
+    if (id) clearSessionVideo(id);
+  }, [id]);
+
+  const goToNumber = useCallback(
     (target: number) => {
-      if (!project) return;
-      const clamped = Math.max(1, Math.min(WIZARD_STEPS.length, target));
+      if (!project || !path) return;
+      const clamped = Math.max(1, Math.min(path.steps.length, target));
       if (clamped > project.current_step) {
         update({
           current_step: clamped,
           ...(project.status === 'draft' && clamped >= 2 ? { status: 'in_progress' as const } : {}),
         });
       }
-      navigate(`/projects/${project.id}/${WIZARD_STEPS[clamped - 1].slug}`);
+      navigate(`/projects/${project.id}/${stepAt(path, clamped).slug}`);
     },
-    [project, update, navigate],
+    [project, path, update, navigate],
   );
 
-  if (loading) {
+  const goTo = useCallback(
+    (slug: StepSlug) => {
+      if (path && stepNumber(path, slug)) goToNumber(stepNumber(path, slug));
+    },
+    [path, goToNumber],
+  );
+
+    if (loading) {
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
         <LoaderCircle className="h-8 w-8 animate-spin text-brand-500" />
@@ -70,13 +68,15 @@ export function WizardPage() {
     );
   }
 
-  const active = WIZARD_STEPS.find((s) => s.slug === step);
-  // Unknown step, or a step the user hasn't unlocked yet: resume at the furthest step reached.
-  if (!active || active.number > project.current_step) {
-    const resume = WIZARD_STEPS[Math.min(project.current_step, WIZARD_STEPS.length) - 1];
+  const projectPath = getWizardPath(project);
+  const activeNumber = step ? stepNumber(projectPath, step) : 0;
+  // Unknown step, a step from another path, or one not unlocked yet: resume at the furthest step reached.
+  if (!activeNumber || activeNumber > project.current_step) {
+    const resume = stepAt(projectPath, project.current_step);
     return <Navigate to={`/projects/${project.id}/${resume.slug}`} replace />;
   }
 
+  const active = stepAt(projectPath, activeNumber);
   const StepComponent = STEP_COMPONENTS[active.slug];
 
   return (
@@ -100,11 +100,24 @@ export function WizardPage() {
       </div>
 
       <Card className="mb-6 px-4 py-4 sm:px-6 sm:py-5">
-        <WizardProgress activeStep={active.number} maxStep={project.current_step} onSelect={goTo} />
+        <WizardProgress
+          steps={projectPath.steps}
+          activeStep={activeNumber}
+          maxStep={project.current_step}
+          onSelect={goToNumber}
+        />
       </Card>
 
       <Card className="p-5 sm:p-8">
-        <StepComponent key={active.slug} project={project} update={update} goTo={goTo} />
+        <StepComponent
+          key={active.slug}
+          project={project}
+          update={update}
+          path={projectPath}
+          goTo={goTo}
+          goNext={() => goToNumber(activeNumber + 1)}
+          goBack={() => goToNumber(activeNumber - 1)}
+        />
       </Card>
     </div>
   );

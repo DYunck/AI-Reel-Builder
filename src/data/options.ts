@@ -76,39 +76,3 @@ export const VIDEO_CHECKLIST: { key: ChecklistKey; label: string; tip: string }[
     tip: 'Pick a trending sound in Instagram, or a royalty-free track. Keep it quieter than the voice.',
   },
 ];
-
-export const PUBLISH_STEPS = [
-  {
-    title: 'Export Video',
-    description:
-      'In your editing app (CapCut, InShot, or Instagram Edits), export as 1080 x 1920 (vertical 9:16), MP4, 30fps.',
-  },
-  {
-    title: 'Upload to Instagram',
-    description: 'Open Instagram, tap the + button, choose Reel, then select your exported video from your camera roll.',
-  },
-  {
-    title: 'Paste Caption',
-    description: 'Tap "Copy caption" below, then paste it into the caption box on Instagram.',
-  },
-  {
-    title: 'Add Hashtags',
-    description: 'Tap "Copy hashtags" below and paste them at the end of your caption.',
-  },
-  {
-    title: 'Publish Reel',
-    description: 'Choose a cover image, tap Share, then come back here and mark your Reel as published.',
-  },
-] as const;
-
-export const WIZARD_STEPS = [
-  { number: 1, slug: 'idea', title: 'Idea', description: 'Tell us about your Reel' },
-  { number: 2, slug: 'script', title: 'Script', description: 'Review your script' },
-  { number: 3, slug: 'voice', title: 'Voice', description: 'Generate a voiceover' },
-  { number: 4, slug: 'scenes', title: 'Scenes', description: 'Plan your shots' },
-  { number: 5, slug: 'build', title: 'Build', description: 'Assemble your video' },
-  { number: 6, slug: 'review', title: 'Review', description: 'Final check' },
-  { number: 7, slug: 'publish', title: 'Publish', description: 'Post to Instagram' },
-] as const;
-
-export type WizardStepSlug = (typeof WIZARD_STEPS)[number]['slug'];

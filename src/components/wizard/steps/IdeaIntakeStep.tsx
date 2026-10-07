@@ -2,12 +2,12 @@ import { useState } from 'react';
 import { Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { useConfirm } from '@/context/ConfirmContext';
-import { Field, Input, Select, Textarea } from '@/components/ui/Field';
+import { Field, Input, Select } from '@/components/ui/Field';
+import { AudienceField, CallToActionField, ToneField } from '@/components/wizard/ReelBasicsFields';
 import { StepFooter, StepIntro } from '@/components/wizard/StepFooter';
 import type { StepProps } from '@/components/wizard/types';
 import { generateContent } from '@/lib/contentGenerator';
-import { LENGTHS, TONES } from '@/data/options';
-import { cn } from '@/lib/utils';
+import { LENGTHS } from '@/data/options';
 
 export function IdeaIntakeStep({ project, update, goTo }: StepProps) {
   const confirm = useConfirm();
@@ -44,7 +44,7 @@ export function IdeaIntakeStep({ project, update, goTo }: StepProps) {
         status: project.status === 'draft' ? 'in_progress' : project.status,
         checklist: { ...project.checklist, script: true },
       });
-      goTo(2);
+      goTo('script');
     } catch {
       setGenError('Something went wrong while generating. Please try again.');
     } finally {
@@ -77,45 +77,9 @@ export function IdeaIntakeStep({ project, update, goTo }: StepProps) {
           )}
         </Field>
 
-        <Field label="Audience" required error={errors.audience} hint="Who are you trying to reach?">
-          {(id) => (
-            <Input
-              id={id}
-              value={project.audience}
-              placeholder="e.g. Busy parents in our neighborhood"
-              maxLength={120}
-              onChange={(e) => update({ audience: e.target.value })}
-            />
-          )}
-        </Field>
+        <AudienceField value={project.audience} error={errors.audience} onChange={(audience) => update({ audience })} />
 
-        <fieldset>
-          <legend className="mb-1.5 text-sm font-medium text-slate-800 dark:text-slate-200">Tone</legend>
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
-            {TONES.map((t) => (
-              <label
-                key={t.value}
-                className={cn(
-                  'cursor-pointer rounded-lg border p-3 transition-colors',
-                  project.tone === t.value
-                    ? 'border-brand-500 bg-brand-50 ring-1 ring-brand-500 dark:bg-brand-500/10'
-                    : 'border-slate-200 hover:border-slate-300 dark:border-slate-800 dark:hover:border-slate-700',
-                )}
-              >
-                <input
-                  type="radio"
-                  name="tone"
-                  value={t.value}
-                  checked={project.tone === t.value}
-                  onChange={() => update({ tone: t.value })}
-                  className="sr-only"
-                />
-                <span className="block text-sm font-semibold text-slate-900 dark:text-white">{t.value}</span>
-                <span className="mt-0.5 block text-xs text-slate-500 dark:text-slate-400">{t.description}</span>
-              </label>
-            ))}
-          </div>
-        </fieldset>
+        <ToneField value={project.tone} onChange={(tone) => update({ tone })} />
 
         <Field label="Video Length" hint="30 seconds is a great starting point for most businesses.">
           {(id) => (
@@ -129,18 +93,7 @@ export function IdeaIntakeStep({ project, update, goTo }: StepProps) {
           )}
         </Field>
 
-        <Field label="Call To Action" hint="What should viewers do after watching? Leave blank and we'll suggest one.">
-          {(id) => (
-            <Textarea
-              id={id}
-              rows={2}
-              value={project.call_to_action}
-              placeholder="e.g. Book your free consultation at the link in our bio"
-              maxLength={160}
-              onChange={(e) => update({ call_to_action: e.target.value })}
-            />
-          )}
-        </Field>
+        <CallToActionField value={project.call_to_action} onChange={(call_to_action) => update({ call_to_action })} />
       </div>
 
       {genError && (
@@ -149,7 +102,7 @@ export function IdeaIntakeStep({ project, update, goTo }: StepProps) {
 
       <StepFooter>
         {project.script && (
-          <Button variant="secondary" onClick={() => goTo(2)} disabled={generating}>
+          <Button variant="secondary" onClick={() => goTo('script')} disabled={generating}>
             Keep current script
           </Button>
         )}

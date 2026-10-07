@@ -71,7 +71,7 @@ export function SettingsPage() {
                   onClick={async () => {
                     const ok = await confirm({
                       title: 'Reset sample data?',
-                      message: 'All Reels saved in this browser will be replaced with the 4 sample Reels.',
+                      message: 'All Reels saved in this browser will be replaced with the 5 sample Reels.',
                       confirmLabel: 'Reset',
                       danger: true,
                     });

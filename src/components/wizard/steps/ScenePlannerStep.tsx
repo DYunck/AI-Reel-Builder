@@ -196,8 +196,8 @@ export function ScenePlannerStep({ project, update, goTo }: StepProps) {
         </>
       )}
 
-      <StepFooter onBack={() => goTo(3)}>
-        <Button size="lg" onClick={() => goTo(5)} disabled={scenes.length === 0} iconRight={<ArrowRight className="h-4 w-4" />}>
+      <StepFooter onBack={() => goTo('voice')}>
+        <Button size="lg" onClick={() => goTo('build')} disabled={scenes.length === 0} iconRight={<ArrowRight className="h-4 w-4" />}>
           Continue to Build
         </Button>
       </StepFooter>

@@ -1,6 +1,6 @@
 # AI Reel Builder: Product Spec
 
-_Last updated: 2026-10-07. Describes what the product is meant to be. For the current technical state and known bugs, see [HANDOFF.md](HANDOFF.md)._
+_Last updated: 2026-10-07 (added the "Post a video I already have" path). Describes what the product is meant to be. For the current technical state and known bugs, see [HANDOFF.md](HANDOFF.md)._
 
 ## 1. What it is
 
@@ -9,6 +9,8 @@ AI Reel Builder is a guided coach that takes a small business owner from "I shou
 It does the parts owners find hardest: deciding what to say, writing it, planning the shots, and remembering every step. The owner supplies what software can't: their face, their shop, their product, and 15–30 minutes with a phone.
 
 **It is not a video editor.** Filming happens on the owner's phone, and editing in a free app they already have (Instagram Edits, CapCut, InShot). AI Reel Builder plans the Reel and walks them through making and posting it.
+
+Owners who **already have a video** can skip the planning: the app checks the video is ready for Instagram, writes the caption and hashtags, helps pick a cover, and walks them through posting.
 
 ## 2. Who it's for
 
@@ -46,6 +48,10 @@ It does the parts owners find hardest: deciding what to say, writing it, plannin
 
 ## 4. The core workflow
 
+"New Reel" first asks which of two paths to take: **Plan a new Reel with help** or **Post a video I already have**. Both end with the same Review and Publish steps, and both Reels appear together on the dashboard (own-video Reels carry an "Own video" label and their cover).
+
+### Path 1: Plan a new Reel with help
+
 Seven steps, all built. The status column shows how real each step is today.
 
 | # | Step | What the user does | Status today |
@@ -57,6 +63,20 @@ Seven steps, all built. The status column shows how real each step is today.
 | 5 | **Build** | Ticks off script, voice, visuals, captions and music | ✅ Works as a checklist; no help for captions or music |
 | 6 | **Review** | Checks everything, marks Ready to Publish | ✅ Works |
 | 7 | **Publish** | Follows posting steps with copy buttons, marks Published | ✅ Works |
+
+### Path 2: Post a video I already have
+
+For owners who already filmed something and only need help getting it posted. Five steps, all built.
+
+| # | Step | What the user does | Status today |
+|---|---|---|---|
+| 1 | **Video** | Picks the video from their phone; sees plain-language checks for shape (9:16), length (Instagram's limit) and quality; describes the video in one sentence, plus audience, tone and call to action | ✅ Works. The video is read in the browser and never uploaded. Videos the browser can't play (e.g. iPhone HEVC in Chrome) fall back to typing the length |
+| 2 | **Caption** | Reviews and edits the caption and hashtags | ⚠️ UI works; caption is template text, not real AI |
+| 3 | **Cover** | Scrubs to a frame, adds optional cover text, saves a full-size cover image | ✅ Works when the browser can play the video; otherwise the owner picks the cover in Instagram |
+| 4 | **Review** | Checks video details, cover, caption and hashtags | ✅ Works |
+| 5 | **Publish** | Posting steps starting with "Find your video in your camera roll" | ✅ Works |
+
+Only the video's details and a small cover preview are saved. If the owner comes back later, they choose the video again to change the cover.
 
 Around the wizard: a dashboard with status counts and a resume card, a searchable list of Reels, four statuses (Draft → In Progress → Ready to Publish → Published), dark mode, and a mobile layout.
 
@@ -78,7 +98,7 @@ Items marked 💲 need a paid service or a new account. Per [CLAUDE.md](CLAUDE.m
 
 ### P0: Must have before real users
 
-1. **Fix the data-loss and trust bugs.** Empty drafts pile up from abandoned "New Reel" clicks; work is silently lost when browser storage is blocked; voice pause/resume is out of sync; the voice isn't flagged after script edits. Details are in HANDOFF.md. *Done when* none of these can be reproduced and each has a regression test.
+1. **Fix the data-loss and trust bugs.** Empty drafts still pile up when an owner picks a path and then leaves (opening "New Reel" without choosing no longer creates one); work is silently lost when browser storage is blocked; voice pause/resume is out of sync; the voice isn't flagged after script edits. Details are in HANDOFF.md. *Done when* none of these can be reproduced and each has a regression test.
 2. **Accounts and private data.** 💲 Needs a Supabase project (the free tier is likely enough). Sign-in by emailed magic link, no passwords. Each owner sees only their own Reels, enforced by database security rules, not just the UI. *Done when* two test accounts can't see each other's Reels, and the open "demo" database policy is gone.
 3. **Real AI writing.** 💲 Needs an AI API (pay per use). Replace the templates with a model call on a server, never exposing keys in the browser. The script must talk about the actual topic and fit the chosen length at about 2.5 spoken words per second. Hashtags should be specific (e.g. `#coldbrewcoffee #portlandcoffee`), not split words. *Done when* scripts for 10 varied sample businesses read as specific and on-length, and generation fails gracefully with a retry.
 4. **Automated tests in the deploy pipeline.** End-to-end wizard test plus checks of the save logic, so `main` can't ship a broken wizard.

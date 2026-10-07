@@ -47,9 +47,9 @@ export function VideoChecklistStep({ project, update, goTo }: StepProps) {
         </div>
       )}
 
-      <StepFooter onBack={() => goTo(4)}>
+      <StepFooter onBack={() => goTo('scenes')}>
         {!allDone && <span className="text-center text-xs text-slate-500 sm:text-right">You can continue and finish these later.</span>}
-        <Button size="lg" onClick={() => goTo(6)} iconRight={<ArrowRight className="h-4 w-4" />}>
+        <Button size="lg" onClick={() => goTo('review')} iconRight={<ArrowRight className="h-4 w-4" />}>
           Continue to Review
         </Button>
       </StepFooter>
